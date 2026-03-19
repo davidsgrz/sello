@@ -1,0 +1,69 @@
+# ============================================
+# SELLO — GitHub Actions Integration Example
+# ============================================
+# Verifica backups como parte de tu pipeline CI/CD
+#
+# Ejemplo: verifica que el backup de staging 
+# es restaurable antes de hacer deploy a producción.
+
+name: Backup Verification
+
+on:
+  # Ejecutar cada noche a las 3:00 UTC
+  schedule:
+    - cron: '0 3 * * *'
+  
+  # También ejecutar manualmente
+  workflow_dispatch:
+
+jobs:
+  verify-backups:
+    runs-on: ubuntu-latest
+    
+    steps:
+      - name: Checkout SELLO
+        uses: actions/checkout@v4
+        with:
+          repository: tu-usuario/sello
+      
+      - name: Setup Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+      
+      - name: Download latest backup
+        run: |
+          # Ejemplo: descargar desde S3
+          # aws s3 cp s3://my-backups/daily-latest.tar.gz /tmp/backup.tar.gz
+          
+          # O desde un servidor:
+          # scp backup-server:/backups/latest.tar.gz /tmp/backup.tar.gz
+          echo "Descargando backup..."
+      
+      - name: Verify backup
+        id: verify
+        run: |
+          python3 sello.py verify /tmp/backup.tar.gz --report json > result.json
+          echo "passed=$(python3 -c 'import json; print(json.load(open("result.json"))["passed"])')" >> $GITHUB_OUTPUT
+      
+      - name: Upload verification report
+        uses: actions/upload-artifact@v4
+        with:
+          name: sello-verification-report
+          path: result.json
+      
+      - name: Fail if backup invalid
+        if: steps.verify.outputs.passed != 'True'
+        run: |
+          echo "❌ Backup verification failed!"
+          cat result.json | python3 -m json.tool
+          exit 1
+      
+      - name: Notify on failure
+        if: failure()
+        run: |
+          # Ejemplo: notificar por Slack
+          # curl -X POST -H 'Content-type: application/json' \
+          #   --data '{"text":"🔓 SELLO: Backup verification FAILED!"}' \
+          #   ${{ secrets.SLACK_WEBHOOK }}
+          echo "Notificación enviada"
