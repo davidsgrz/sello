@@ -8,7 +8,7 @@ services:
       context: .
       dockerfile: server/Dockerfile
     ports:
-      - "8005:8000"
+      - "8005:8005"
     volumes:
       - sello-data:/data
     environment:
