@@ -1,0 +1,24 @@
+# SELLO Pro Server — Docker Compose
+# Deploy: docker compose up -d
+# API docs: http://localhost:8000/docs
+
+services:
+  sello-server:
+    build:
+      context: .
+      dockerfile: server/Dockerfile
+    ports:
+      - "8000:8000"
+    volumes:
+      - sello-data:/data
+    environment:
+      - SELLO_DB_PATH=/data/sello.db
+    restart: unless-stopped
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:8000/health"]
+      interval: 30s
+      timeout: 5s
+      retries: 3
+
+volumes:
+  sello-data:

@@ -1,0 +1,40 @@
+__pycache__/
+*.pyc
+*.pyo
+*.egg-info/
+dist/
+build/
+.eggs/
+
+# SELLO data
+*.db
+*.db-journal
+sello-report-*.html
+sello-history-*.html
+
+# IDE
+.vscode/
+.idea/
+*.swp
+*.swo
+*~
+
+# OS
+.DS_Store
+Thumbs.db
+
+# Env
+.env
+.env.local
+*.env
+
+# Credentials (NEVER commit)
+.sello-credentials
+agent.json
+
+# Docker
+docker-compose.prod.yml
+
+# Node (if building React dashboard)
+node_modules/
+.next/
